@@ -7,9 +7,12 @@ import re
 
 
 class Region:
+    # Each region will have a url corresponding to each of 2 categories: software and traditional engineering.
+    # This is basically a convenience class. The project began in a hackathon-like way and hasn't been properly
+    # refined as of yet.
     def __init__(self, name):
-        self.url = ""
-        self.populated = False
+        self.url_software = ""
+        self.url_aeromech = ""
         self.name = name
 
 
@@ -17,38 +20,34 @@ class Indeed(scrapy.Spider):
     name = "indeed"
     allowed_domains = ["www.indeed.com"]
 
-    base_url1 = "http://www.indeed.com/jobs?q=software+engineer+c%2B%2B&l="
-    base_url2 = "&sr=directhire&radius=25&start="
+    software_base_url1 = "http://www.indeed.com/jobs?q=software+c%2B%2B&l="
+    software_base_url2 = "&sr=directhire&radius=25&start="
+
+    aeromech_base_url1 = "http://www.indeed.com/jobs?q=engineer+(mechanical+or+aerospace)&l="
+    areomech_base_url2 = "&sr=directhire&radius=25&start="
 
     regions = []
     regions.append(Region("texas"))
-    # regions.append(Region("colorado"))
-    # regions.append(Region("california"))
-    # regions.append(Region("washington"))
-    # regions.append(Region("florida"))
-    # regions.append(Region("new+jersey"))
-    # regions.append(Region("connecticut"))
-    # regions.append(Region("new+york"))
-    # regions.append(Region("illinois"))
-    # regions.append(Region("massachusetts"))
 
     for state in regions:
-        state.url = base_url1 + state.name + base_url2
+        state.url_software = software_base_url1 + state.name + software_base_url2
+        state.url_aeromech = aeromech_base_url1 + state.name + areomech_base_url2
 
     start_urls = []
-    for ii in regions:
-        start_urls.append(ii.url + "0")
+    for state in regions:
+        start_urls.append(state.url_software + "0")
+        start_urls.append(state.url_aeromech + "0")
 
-    # Each region seed will populate an n length list of follower pages
+    # Each region seed will populate an n length list of follower pages.
+    # parse() operates on an entry from start_urls
     def parse(self, response):
-        for state in Indeed.regions:
-            if state.name in response.url:
-                depth = parse_page_max_depth(self, response, state)
-                # depth = 20
-                for i in range(10, depth, 10):
-                    str1 = state.url + str(i)
-                    str1 = str1.decode('unicode-escape')
-                    yield scrapy.Request(str1, callback=self.parse_results_page)
+        depth = parse_page_max_depth(self, response)
+        base_response_url = response.url
+        base_response_url = base_response_url[:-1]
+        for i in range(10, depth, 10):
+            str1 = base_response_url + str(i)
+            str1 = str1.decode('unicode-escape')
+            yield scrapy.Request(str1, callback=self.parse_results_page)
 
     # Scrape useful info from target page and generate requests for follower links (handled in pipeline)
     def parse_results_page(self, response):
@@ -102,7 +101,7 @@ class Indeed(scrapy.Spider):
 
 
 # Parse out the maximum result count so we can populate urls to that point
-def parse_page_max_depth(self, response, state):
+def parse_page_max_depth(self, response):
     sel = Selector(response)
     count = sel.xpath('//div[@id="searchCount"]/text()').extract()[0]
     search = re.search(r"Jobs \d+ to \d+ of ([\d,]+)", count)
@@ -122,8 +121,8 @@ def format_item(self, item):
 
 # Skipping here pares down the list of pages to be crawled, increasing speed non-trivially (vs in pipeline)
 def exclusion(self, item):
-    if date_exclusion(self, item):
-        return True
+    # if date_exclusion(self, item):
+        # return True
     if job_title_exclusion(self, item):
         return True
     return False
@@ -139,6 +138,7 @@ def job_title_exclusion(self, item):
     anti_words = []
     anti_words.append(r"associate")
     anti_words.append(r"junior")
+    anti_words.append(r"ruby")
 
     for ii in anti_words:
         if re.search(r"\b" + ii + r"\b", item['job_title']):
