@@ -44,5 +44,6 @@ class CareerBuilder(scrapy.Spider):
 def parse_page_max_depth(self, response):
     sel = Selector(response)
     count = sel.xpath('//div[@class="count"]/text()').extract()[0]
-    arg = 1 + 2
-    return 0
+    search = re.findall(r'\d+', count)
+    result_count = int(search[0])
+    return int(result_count)
