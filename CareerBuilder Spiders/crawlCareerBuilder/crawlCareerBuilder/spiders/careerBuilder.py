@@ -35,15 +35,21 @@ class CareerBuilder(scrapy.Spider):
     # Note: for the careerbuilder site, page 0 and 1 will be identical
     def parse(self, response):
         depth = parse_page_max_depth(self, response)
-        depth = depth
+        base_response_url = response.url
+        base_response_url = base_response_url[:-1]
+        pages = depth / 25
+        for i in range(2, pages, 1):
+            str1 = base_response_url + str(i)
+            str1 = str1.decode('unicode-escape')
+            yield scrapy.Request(str1, callback=self.parse_results_page)
 
     def parse_results_page(self, response):
-        pass
+        sel = Selector(response)
+        arg = 4
 
 
 def parse_page_max_depth(self, response):
     sel = Selector(response)
     count = sel.xpath('//div[@class="count"]/text()').extract()[0]
     search = re.findall(r'\d+', count)
-    result_count = int(search[0])
-    return int(result_count)
+    return int(search[0])
