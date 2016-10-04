@@ -42,6 +42,7 @@ def format_response(item):
 def text_exclusion(body):
     anti_text = []
     anti_text.append(r"top secret")
+    anti_text.append(r"hvac")
     # anti_text.append(r"ts")
     # special characters don't play well with word boundaries...
     # anti_text.append(re.escape("c++"))

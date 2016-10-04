@@ -28,6 +28,7 @@ class Indeed(scrapy.Spider):
 
     regions = []
     regions.append(Region("texas"))
+    regions.append(Region("colorado"))
 
     for state in regions:
         state.url_software = software_base_url1 + state.name + software_base_url2
@@ -121,8 +122,8 @@ def format_item(self, item):
 
 # Skipping here pares down the list of pages to be crawled, increasing speed non-trivially (vs in pipeline)
 def exclusion(self, item):
-    # if date_exclusion(self, item):
-        # return True
+    if date_exclusion(self, item):
+        return True
     if job_title_exclusion(self, item):
         return True
     return False
@@ -139,6 +140,17 @@ def job_title_exclusion(self, item):
     anti_words.append(r"associate")
     anti_words.append(r"junior")
     anti_words.append(r"ruby")
+    anti_words.append(r"manager")
+    anti_words.append(r"building")
+    anti_words.append(r"facilities")
+    anti_words.append(r"field")
+    anti_words.append(r"packaging")
+    anti_words.append(r"intern")
+    anti_words.append(r"quality")
+    anti_words.append(r"electrical")
+    anti_words.append(r"maintenance")
+    anti_words.append(r"hvac")
+    anti_words.append(r"reliability")
 
     for ii in anti_words:
         if re.search(r"\b" + ii + r"\b", item['job_title']):

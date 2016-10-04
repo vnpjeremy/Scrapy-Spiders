@@ -38,14 +38,20 @@ class CareerBuilder(scrapy.Spider):
         base_response_url = response.url
         base_response_url = base_response_url[:-1]
         pages = depth / 25
-        for i in range(2, pages, 1):
+        for i in range(1, pages, 1):
             str1 = base_response_url + str(i)
             str1 = str1.decode('unicode-escape')
             yield scrapy.Request(str1, callback=self.parse_results_page)
 
     def parse_results_page(self, response):
         sel = Selector(response)
-        arg = 4
+        job_rows = sel.xpath('//div[@class="job-row"]')
+        for row in job_rows:
+            item = CareerBuilderItem()
+            job_title = row.xpath('div/div/h2/a[@href]/text()').extract()
+            company = row.xpath('div/div/h4/a[@href]/text()').extract()
+            location = row.xpath('div/div/h4[@class="job-text"]/text()').extract()
+            arg = 4
 
 
 def parse_page_max_depth(self, response):
