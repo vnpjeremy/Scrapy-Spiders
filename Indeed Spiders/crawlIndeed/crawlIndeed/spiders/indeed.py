@@ -29,6 +29,10 @@ class Indeed(scrapy.Spider):
     regions = []
     regions.append(Region("texas"))
     regions.append(Region("colorado"))
+    regions.append(Region("washington+state"))
+    regions.append(Region("massachusetts"))
+    regions.append(Region("california"))
+    regions.append(Region("washington+dc"))
 
     for state in regions:
         state.url_software = software_base_url1 + state.name + software_base_url2
@@ -151,6 +155,27 @@ def job_title_exclusion(self, item):
     anti_words.append(r"maintenance")
     anti_words.append(r"hvac")
     anti_words.append(r"reliability")
+    anti_words.append(r"university")
+    anti_words.append(r"technician")
+    anti_words.append(r"business")
+    anti_words.append(r"support")
+    anti_words.append(r"co-op")
+    anti_words.append(r"electrician")
+    anti_words.append(r"cable")
+    anti_words.append(r"student")
+    anti_words.append(r"plant")
+    anti_words.append(r"electronic")
+    anti_words.append(r"civil")
+    anti_words.append(r"drafter")
+    anti_words.append(r"buyer")
+    anti_words.append(r"sales")
+    anti_words.append(r"hadoop")
+    anti_words.append(r"cyber")
+    anti_words.append(r"qa")
+    anti_words.append(r"web")
+    anti_words.append(r"vulnerability")
+    anti_words.append(r"java")
+    anti_words.append(r"manufacturing")
 
     for ii in anti_words:
         if re.search(r"\b" + ii + r"\b", item['job_title']):

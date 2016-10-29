@@ -41,14 +41,22 @@ def format_response(item):
 
 def text_exclusion(body):
     anti_text = []
-    anti_text.append(r"top secret")
     anti_text.append(r"hvac")
-    # anti_text.append(r"ts")
+    anti_text.append(r"sci")
+    anti_text.append(r"plumbing")
     # special characters don't play well with word boundaries...
-    # anti_text.append(re.escape("c++"))
     for ii in anti_text:
         if re.search(r"\b" + ii + r"\b", body):
             return True
+
+    anti_phrase = []
+    anti_phrase.append("top secret")
+    anti_phrase.append("financial services")
+
+    for ii in anti_phrase:
+        if ii in body:
+            return True
+
     return False
 
 
